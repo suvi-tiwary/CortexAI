@@ -53,9 +53,10 @@ const response = await llm.invoke([
 
 return {
      ...state,
-        agent:response.content.toLowerCase()
+     agent: response.content.toLowerCase().trim()
 }
      } catch (error) {
-          return resizeBy.status(500).send(`router agent error ${erorr}`)
-     }
+        console.error("❌ Router agent error:", error)
+        throw error
+    }
 }

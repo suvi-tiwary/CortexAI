@@ -1,7 +1,3 @@
-export const pdfAgent = async(params)=>{
-    try {
-        
-    } catch (error) {
-        
-    }
-}
+export const pdfAgent = async (params = {}) => {
+   
+};

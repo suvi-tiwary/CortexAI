@@ -1,102 +1,405 @@
-import React from 'react';
+import React from "react";
 import { FaHamburger } from "react-icons/fa";
 import { CgProfile } from "react-icons/cg";
-import { FiLogOut } from "react-icons/fi";
-import { useDispatch, useSelector } from "react-redux"
-import { addConversation, setSelectedConversation } from '../redux/conversationSlice';
-import api from '../features/axios';
-import { setUserData } from '../redux/userSlice';
-import { FiMessageSquare } from "react-icons/fi";
+import { FiLogOut, FiMessageSquare } from "react-icons/fi";
+import { useDispatch, useSelector } from "react-redux";
+
+import { addConversation, setSelectedConversation } from "../redux/conversationSlice";
+import { setUserData } from "../redux/userSlice";
+import api from "../features/axios";
 
 const Sidebar = () => {
-  const dispatch = useDispatch()
-  const {conversations,selectedConversation} = useSelector(state=>state.conversation)
 
-  const createConversation = async()=>{
+  const dispatch = useDispatch();
+
+  const {
+    conversations = [],
+    selectedConversation
+  } = useSelector(state => state.conversation);
+
+
+  const createConversation = async () => {
     try {
-      let data = await api.get("/chat/create-conversation")
-      dispatch(addConversation(data.data))
-      dispatch(setSelectedConversation(data.data))
-    } catch (error) {
-      console.log(`create coversation fetching error ${error}`)
-    }
-  }
-  
-    const handleLogout = async()=>{
-    try {
-      let data = await api.get("/auth/logout")
-      dispatch(setUserData(null))
+      const res = await api.get("/chat/create-conversation");
+
+      dispatch(addConversation(res.data));
+      dispatch(setSelectedConversation(res.data));
 
     } catch (error) {
-      console.log(`logout error ${error}`)
+      console.log("create conversation error", error);
     }
-  }
-  
+  };
+
+
+  const handleLogout = async () => {
+    try {
+      await api.get("/auth/logout");
+      dispatch(setUserData(null));
+
+    } catch (error) {
+      console.log("logout error", error);
+    }
+  };
+
+
   return (
-    <div className='w-[270px] h-screen flex flex-col
-      bg-[#0a0a0f]/80 backdrop-blur-xl 
-      border-r border-white/[0.08]
-      shadow-2xl shadow-black/50'>
-      
+
+    <aside className=" w-[280px] h-screen flex flex-col bg-[#09090f]/90 backdrop-blur-xl border-r border-white/[0.08]shadow-2xl shadow-black/40" >
+
+
       {/* Header */}
-      <div className='flex items-center gap-3 p-4'>
-        <FaHamburger size={24} color='white' className='cursor-pointer hover:opacity-70 transition-opacity'/>
-        <h1 className='font-bold text-white text-[22px] tracking-tight'>Cortex AI</h1>
+
+      <div className="flex items-center gap-3 px-5 py-5">
+
+        <FaHamburger
+          size={22}
+          className="
+          text-white cursor-pointer
+          hover:text-violet-400
+          transition
+          "
+        />
+
+
+        <h1
+          className="
+          text-white
+          text-xl
+          font-bold
+          tracking-tight
+          "
+        >
+          Cortex AI
+        </h1>
+
       </div>
 
-      {/* Divider */}
-      <div className='w-full h-[1px] bg-white/[0.08]'></div>
-       
-      {/* New Chat Button */}
-      <div className='p-4' onClick={()=>createConversation()}>
-        <button className='w-full bg-gradient-to-r from-violet-600 to-fuchsia-600 
-          hover:from-violet-500 hover:to-fuchsia-500
-          rounded-xl flex items-center justify-center gap-2
-          transition-all duration-200 hover:shadow-lg hover:shadow-violet-500/25 
-          active:scale-[0.98] p-3 text-white font-semibold text-sm'>
+
+
+      <div className="h-[1px] bg-white/10"/>
+
+
+
+
+      {/* New Chat */}
+
+      <div className="p-4">
+
+        <button
+          onClick={createConversation}
+          className="
+          w-full
+          py-3
+          rounded-xl
+          text-sm
+          font-semibold
+          text-white
+
+          bg-gradient-to-r
+          from-violet-600
+          to-indigo-700
+
+          hover:from-violet-500
+          hover:to-fuchsia-600
+
+          shadow-lg
+          shadow-violet-500/20
+
+          transition-all
+          active:scale-95
+          "
+        >
+
           + New Chat
+
         </button>
+
       </div>
 
-      <div className='px-4 pb-2'>
-        <span className='text-white/40 text-[11px] font-semibold uppercase tracking-wider'>
+
+
+
+
+      {/* Title */}
+
+      <div className="px-5 mb-2">
+
+        <p
+          className="
+          text-[11px]
+          uppercase
+          tracking-widest
+          text-white/40
+          font-semibold
+          "
+        >
           Recent Conversations
-        </span>
+        </p>
+
       </div>
 
-      <div className='flex-1 overflow-y-auto px-2 custom-scrollbar'>
-         {conversations.map((conv,i)=>{
-           const isActive = selectedConversation?._id==conv?._id
-           return <div key={conv._id} className={`flex items-center gap-2.5 cursor-pointer mb-0.5 px-3 py-2.5 rounded-[10px] transition-colors duration-100 ${isActive?"bg-indigo-500/10 border-indigo-500/[0.18]":"bg-transparent border-transparent"} hover:bg-indigo-500/10`} onClick={()=>dispatch(setSelectedConversation(conv))}>
-                <div><FiMessageSquare /></div>
-                <span>{conv.title || "New Chat"}</span>
-           </div>
-         })}
-      </div>
 
-      {/* Footer - Always at bottom */}
-      <div className='p-4 border-t border-white/[0.08]'>
-        <div className='flex items-center justify-between'>
-          <button className='flex items-center gap-3 p-2 rounded-xl hover:bg-white/5 transition-colors w-full'>
-            <div className='w-8 h-8 rounded-full bg-white/10 flex items-center justify-center'>
-              <CgProfile size={20} color='white' />
-            </div>
-            <span className='text-white/80 text-sm font-medium'>Profile</span>
-          </button>
+
+
+
+      {/* Conversations */}
+
+      <div
+        className="
+        flex-1
+        overflow-y-auto
+        px-3
+        space-y-1
+        custom-scrollbar
+        "
+      >
+
+
+      {
+        conversations.map((conv)=>{
+
+
+          const active =
+          selectedConversation?._id === conv._id;
+
+
+
+          return (
+
+          <div
+
+          key={conv._id}
+
+          onClick={() =>
+          dispatch(setSelectedConversation(conv))
+          }
+
+          className={`
           
-          <button className='p-2 rounded-xl hover:bg-red-500/10 transition-colors ml-2' onClick={handleLogout}>
-            <FiLogOut size={20} color='#ef4444' />
-          </button>
-        </div>
+          group
+
+          flex
+          items-center
+          gap-3
+
+          px-3
+          py-2.5
+
+          rounded-xl
+
+          cursor-pointer
+
+          transition-all
+          
+          ${
+            active
+            ?
+            "bg-violet-500/15"
+            :
+            "hover:bg-white/[0.06]"
+          }
+
+          `}
+
+          >
+
+
+
+            <FiMessageSquare
+
+            size={17}
+
+            className={`
+            
+            transition-colors
+
+            ${
+              active
+              ?
+              "text-violet-400"
+              :
+              "text-white/50 group-hover:text-violet-400"
+            }
+
+            `}
+
+            />
+
+
+
+
+            <span
+
+            className="
+            text-sm
+            text-white/80
+            truncate
+            "
+
+            >
+
+              {conv.title || "New Chat"}
+
+            </span>
+
+
+          </div>
+
+
+          )
+
+        })
+      }
+
+
       </div>
+
+
+
+
+
+
+      {/* Footer */}
+
+      <div
+      className="
+      p-4
+      border-t
+      border-white/10
+      "
+      >
+
+
+        <div
+        className="
+        flex
+        items-center
+        gap-2
+        "
+        >
+
+
+          <button
+
+          className="
+          flex
+          items-center
+          gap-3
+
+          flex-1
+
+          p-2
+
+          rounded-xl
+
+          hover:bg-white/5
+
+          transition
+
+          "
+
+          >
+
+
+            <div
+
+            className="
+            w-9
+            h-9
+            rounded-full
+
+            bg-gradient-to-br
+            from-violet-500
+            to-indigo-600
+
+            flex
+            items-center
+            justify-center
+            "
+
+            >
+
+              <CgProfile
+              size={20}
+              className="text-white"
+              />
+
+            </div>
+
+
+
+            <span
+            className="
+            text-white/80
+            text-sm
+            "
+            >
+              Profile
+            </span>
+
+
+          </button>
+
+
+
+
+          <button
+
+          onClick={handleLogout}
+
+          className="
+          p-3
+          rounded-xl
+
+          hover:bg-red-500/10
+
+          transition
+
+          "
+
+          >
+
+            <FiLogOut
+            size={20}
+            className="
+            text-red-400
+            "
+            />
+
+          </button>
+
+
+        </div>
+
+
+      </div>
+
+
+
 
       <style>{`
-        .custom-scrollbar::-webkit-scrollbar { width: 3px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 4px; }
+
+      .custom-scrollbar::-webkit-scrollbar {
+        width:4px;
+      }
+
+      .custom-scrollbar::-webkit-scrollbar-track {
+        background:transparent;
+      }
+
+      .custom-scrollbar::-webkit-scrollbar-thumb {
+        background:rgba(255,255,255,0.1);
+        border-radius:10px;
+      }
+
       `}</style>
-    </div>
+
+
+
+    </aside>
+
   );
 };
+
 
 export default Sidebar;

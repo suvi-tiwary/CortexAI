@@ -1,7 +1,3 @@
-export const visionAgent = async(params)=>{
-    try {
-        
-    } catch (error) {
-        
-    }
-}
+export const visionAgent = async (params = {}) => {
+   
+};
