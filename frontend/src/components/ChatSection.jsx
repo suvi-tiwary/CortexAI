@@ -72,6 +72,16 @@ const ChatSection = () => {
     messages()
   },[selectedConversation?._id, dispatch])
   
+
+  const bottomRef = useRef(null);
+   useEffect(()=>{
+    requestAnimationFrame(()=>{
+    bottomRef?.current.scrollIntoView({
+      behavior:"smooth",
+      block:"end"
+    })
+    })
+   },[message?.length])
   return (
     <div className="flex-1 flex flex-col h-screen bg-[#0d0d12] relative overflow-hidden">
       {/* Ambient Background */}
@@ -100,6 +110,8 @@ const ChatSection = () => {
          <ChatBubble role={mes.role} content={mes.content} />
         </div>
         ))}
+
+        <div ref={bottomRef}></div>
       </div>
 
       {/* Input Area */}
