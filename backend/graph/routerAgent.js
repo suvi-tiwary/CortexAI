@@ -24,7 +24,7 @@ Categories:
 - vision
   Requests involving images, including image generation, image editing, image analysis, OCR, describing images, screenshots, diagrams, or visual content.
 
-- coding
+- coding 
   Requests involving programming, debugging, code generation, APIs, software architecture, algorithms, databases, DevOps, or technical implementation.
 
 Rules:

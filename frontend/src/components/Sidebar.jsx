@@ -45,7 +45,7 @@ const Sidebar = () => {
 
   return (
 
-    <aside className=" w-[280px] h-screen flex flex-col bg-[#09090f]/90 backdrop-blur-xl border-r border-white/[0.08]shadow-2xl shadow-black/40" >
+    <aside className=" w-[280px] h-screen flex flex-col bg-[#09090f]/90 backdrop-blur-xl border-r border-white/[0.08] shadow-2xl shadow-black/40" >
 
       <div className="flex items-center gap-3 px-5 py-5">
 
@@ -60,7 +60,7 @@ const Sidebar = () => {
 
       <div className="p-4">
         <button onClick={createConversation} className=" w-full py-3 rounded-xl text-sm font-semibold text-white bg-gradient-to-r  from-violet-600  to-indigo-700
-        hover:from-violet-500  hover:to-fuchsia-600 shadow-lg shadow-violet-500/20 transition-all active:scale-95">
+        hover:from-violet-500  hover:to-fuchsia-600 shadow-lg shadow-violet-500/20 transition-all active:scale-95 cursor-pointer">
           + New Chat
         </button>
       </div>
@@ -79,7 +79,7 @@ const Sidebar = () => {
           <div key={conv._id} onClick={() => dispatch(setSelectedConversation(conv))} className={`  group flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer transition-all 
           ${active? "bg-violet-500/15" : "hover:bg-white/[0.06]"}`}>
             <FiMessageSquare size={17} className={`transition-colors ${active?"text-violet-400":"text-white/50 group-hover:text-violet-400"}`}/>
-            <span className="text-sm text-white/80 truncate">
+            <span className="text-sm text-white/80 truncate font-semibold">
              {conv.title || "New Chat"}
            </span>
 
@@ -96,7 +96,7 @@ const Sidebar = () => {
         <div className=" flex items-center gap-2 " >
 
           <button className=" flex items-center gap-3 flex-1 p-2 rounded-xl hover:bg-white/5 transition">
-          <div className=" w-9 h-9 rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center">
+          <div className=" w-9 h-9 rounded-full bg-orange-500 flex items-center justify-center">
               <CgProfile size={20} className="text-white"/>
           </div>
             <span className="  text-white/80 text-sm " >

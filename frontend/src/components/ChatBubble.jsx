@@ -1,123 +1,199 @@
-import React, { useState } from 'react';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
+import { Children } from "react";
+import { useState } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import {Copy,Check} from "lucide-react"
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 
-const normalizeContent = (content) => {
-  if (typeof content !== 'string') return '';
+const ChatBubble = ({ role, content, images, artifacts,files }) => {
 
-  return content
-    .replace(/<br\s*\/?>/gi, '\n')
-    .replace(/<\/p>/gi, '\n\n')
-    .replace(/<p[^>]*>/gi, '')
-    .replace(/<\/div>/gi, '\n')
-    .replace(/<div[^>]*>/gi, '')
-    .replace(/<\/li>/gi, '\n')
-    .replace(/<li[^>]*>/gi, '- ')
-    .replace(/<strong[^>]*>/gi, '**')
-    .replace(/<\/strong>/gi, '**')
-    .replace(/<em[^>]*>/gi, '*')
-    .replace(/<\/em>/gi, '*')
-    .replace(/<[^>]+>/g, '')
-    .trim();
-};
+  const isUser = role === "user";
+  const [lightbox,setLightBox]=useState(null)
+  const [copiedCode,setCopiedCode]=useState("")
 
-const CodeBlockCard = ({ children, className, ...props }) => {
-  const [copied, setCopied] = useState(false);
-  const codeText = String(children).replace(/\n$/, '');
-  const isInstallStyle = /npm|pnpm|yarn|pip|docker|brew|apt|git clone|cd\s+/i.test(codeText);
-
-  const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(codeText);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1400);
-    } catch (error) {
-      console.error('Copy failed', error);
-    }
-  };
-
+  const copyCode = async(code)=>{
+     await navigator.clipboard.writeText(code)
+     setCopiedCode(code)
+     setTimeout(()=>{
+      setCopiedCode("")
+     },2000)
+  }
   return (
-    <div className="my-3 overflow-hidden rounded-2xl border border-white/15 bg-white/10 p-3 shadow-[0_8px_30px_rgba(0,0,0,0.25)] backdrop-blur-xl">
-      <div className="mb-2 flex items-center justify-between">
-        <span className="text-[11px] uppercase tracking-[0.25em] text-zinc-400">
-          {isInstallStyle ? 'Install / Command' : 'Code'}
-        </span>
-        <button
-          type="button"
-          onClick={handleCopy}
-          className="rounded-full border border-white/15 bg-black/20 px-2.5 py-1 text-[11px] text-zinc-200 transition hover:bg-white/20"
-        >
-          {copied ? 'Copied' : 'Copy'}
-        </button>
-      </div>
-      <pre className="overflow-x-auto whitespace-pre-wrap break-words rounded-xl bg-black/30 p-3 text-[13px] leading-6 text-zinc-100">
-        <code className={className} {...props}>
-          {children}
-        </code>
-      </pre>
-    </div>
-  );
-};
+    <div 
+      className={`flex my-3 px-5 ${isUser ? "justify-end" : "justify-start" }`}>
 
-const ChatBubble = ({ role, content }) => {
-  const isUser = role === 'user';
-  const normalizedContent = normalizeContent(content);
-
-  return (
-    <div className={`flex ${isUser ? 'justify-end' : 'justify-start'} my-3 px-5`}>
       <div
-        className={`max-w-[75%] rounded-2xl px-4 py-3 ${
-          isUser
-            ? 'rounded-tr-sm bg-gradient-to-br from-indigo-500 via-violet-700 to-purple-700'
-            : 'rounded-tl-sm bg-white/[0.09]'
-        }`}
-      >
-        {isUser ? (
-          <div className="whitespace-pre-wrap break-words text-sm leading-7 text-white">
-            {normalizedContent}
+        className={`max-w-[75%] rounded-2xl px-4 py-3 ${isUser?"bg-violet-600 text-white rounded-tr-sm": " text-zinc-100" }`}>
+
+        {isUser?<p className="whitespace-pre-wrap">
+            {content}
+          </p>
+          :
+          <ReactMarkdown remarkPlugins={[remarkGfm]}
+          components={{
+            h1:({children})=>(
+              <h1 className="font-bold text-2xl mt-5 mb-3 text-red-500">{children}</h1>
+             ),
+             h2:({children})=>(
+              <h2 className="font-semibold text-xl mt-4 mb-2">{children}</h2>
+             ),
+              h3:({children})=>(
+              <h3 className="text-xl mt-4 mb-2">{children}</h3>
+             ),
+             p:({children})=>(
+              <p className="mb-3 whitespace-pre-wrap break-words">{children}</p>
+             ),
+             ul:({children})=>(
+              <ul className="list-disc pl-5 space-y-1 my-2 ">{children}</ul>
+             ),
+              ol:({children})=>(
+              <ol className="list-decimal pl-5 space-y-1 my-2">{children}</ol>
+             ),
+             table:({children})=>(
+              <div className="overflow-x-auto my-4">
+              <table className="min-w-full border border-white/10">{children}</table>
+              </div>
+             ),
+             th:({children})=>(
+              <th className="border border-white/10 bg-white/5 px-3 py-2 text-left">{children}</th>
+             ),
+              td:({children})=>(
+              <td className="border border-white/10 px-3 py-2">{children}</td>
+             ),
+
+             code:({className,children})=>{
+              const value = String(children).trim();
+              if(!className){
+                return <code className="px-1.5 py-0.5 rounded-xl bg-white/10 text-violet-500">{value}</code>
+              }
+
+              const language = className?.replace("language-","")
+              return (
+                <div className="my-4 overflow-hidden rounded-xl border border-white/10 bg-[#111318]">
+                  <div className=" flex justify-between bg-[#1b1d24] border-b border-white/10 ml-2 mr-2 p-1">
+                  <span className=" uppercase text-sm text-slate-500">{language}</span>
+
+                  <button className="flex items-center gap-1 text-xs cursor-pointer" onClick={()=>copyCode(value)}>{copiedCode==value?<><Check/>Copied</>:<><Copy size={16}/>Copy</>}</button>
+                </div>
+
+                <SyntaxHighlighter language={language} style={oneDark} wrapLongLines showLineNumbers 
+                customStyle={{
+                  margin:0,
+                  padding:"16px",
+                  background:"#0d1117",
+                  fontSize:"14px"
+
+
+                }}>{value}</SyntaxHighlighter>
+                </div>
+               
+              )  
+             }
+
+          }}
+          >
+            {content}
+          </ReactMarkdown>
+        }
+
+        {
+          images?.length > 0 &&
+          <div className="mt-3 flex flex-wrap gap-3">
+            {
+              images?.map((img,index)=>(
+                <img
+                  key={index}
+                  src={img}
+                  onClick={()=>setLightBox(img)}
+                  onError={(e)=>e.currentTarget.remove()}
+                  className="w-40 h-28 object-cover border border-white/10 cursor-zoom-in rounded-xl hover:opacity-90 transition"
+                />
+              ))
+            }
           </div>
-        ) : (
-          <div className="text-sm leading-7 text-zinc-100">
-            <ReactMarkdown
-              remarkPlugins={[remarkGfm]}
-              components={{
-                p: ({ children }) => <p className="mb-2 last:mb-0 leading-7">{children}</p>,
-                ul: ({ children }) => <ul className="my-2 ml-4 list-disc space-y-1">{children}</ul>,
-                ol: ({ children }) => <ol className="my-2 ml-4 list-decimal space-y-1">{children}</ol>,
-                li: ({ children }) => <li className="leading-7">{children}</li>,
-                h1: ({ children }) => <h1 className="mb-2 text-lg font-semibold">{children}</h1>,
-                h2: ({ children }) => <h2 className="mb-2 text-base font-semibold">{children}</h2>,
-                h3: ({ children }) => <h3 className="mb-2 text-sm font-semibold">{children}</h3>,
-                code: ({ inline, className, children, ...props }) =>
-                  inline ? (
-                    <code className="rounded bg-black/20 px-1.5 py-0.5 text-[0.9em] text-violet-200" {...props}>
-                      {children}
-                    </code>
-                  ) : (
-                    <CodeBlockCard className={className} {...props}>
-                      {children}
-                    </CodeBlockCard>
-                  ),
-                a: ({ href, children }) => (
-                  <a href={href} className="break-all text-violet-300 underline" target="_blank" rel="noreferrer">
-                    {children}
-                  </a>
-                ),
-                blockquote: ({ children }) => (
-                  <blockquote className="my-2 border-l-2 border-violet-400/50 pl-3 italic text-zinc-300">
-                    {children}
-                  </blockquote>
-                ),
-                hr: () => <hr className="my-3 border-white/10" />,
-              }}
-            >
-              {normalizedContent}
-            </ReactMarkdown>
-          </div>
-        )}
+        }
+
+        {
+  files?.length > 0 &&
+  <div className="mt-3 flex flex-wrap gap-3">
+
+    {files.map((file, index) => {
+
+      if (file.type === "image") {
+        return (
+          <img
+            key={index}
+            src={file.url}
+            alt={file.name}
+            onClick={() => setLightBox(file.url)}
+            className="w-[430px] h-[290px] object-cover border border-white/10 cursor-zoom-in rounded-xl hover:opacity-90 transition"
+          />
+        );
+      }
+
+      if (file.type === "pdf") {
+        return (
+          <a
+            key={index}
+            href={file.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="px-4 py-3 rounded-xl bg-white/10 hover:bg-white/20"
+          >
+            📄 {file.name}
+          </a>
+        );
+      }
+
+      if (file.type === "ppt") {
+        return (
+          <a
+            key={index}
+            href={file.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="px-4 py-3 rounded-xl bg-white/10 hover:bg-white/20"
+          >
+            📊 {file.name}
+          </a>
+        );
+      }
+
+      return null;
+    })}
+
+  </div>
+}
+
+
       </div>
+
+      {lightbox && <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex justify-center items-center p-6">
+        <button className="absolute top-5 right-5 text-white/80 hover:text-white w-[38px] h-[47px] p-3 bg-red-700 cursor-pointer" onClick={()=>setLightBox(null)}>
+          x
+        </button>
+        <img src={lightbox} className="max-w-[90vw] max-h-[80vh] rounded-2xl border border-white/10 shadow-2xl object-contain"/>
+        </div>}
+
     </div>
-  );
-};
+  )
+}
 
 export default ChatBubble;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

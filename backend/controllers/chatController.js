@@ -42,11 +42,13 @@ export const getConversations = async(req,res)=>{
 
 export const saveMessage = async(req,res)=>{
     try {
-        let {conversationId,role,content}=req.body
+        let {conversationId,role,content,images,Artificate}=req.body
         const message = await Message.create({
             role,
             content,
-            conversationId
+            conversationId,
+            images,
+            Artificate: Artificate || []
         })
 
         return res.status(200).send(message)
@@ -64,3 +66,4 @@ export const getMessages = async(req,res)=>{
         return res.status(500).send(`get message error ${error}`)
     }
 }
+

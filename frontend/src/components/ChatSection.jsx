@@ -5,8 +5,8 @@ import api from '../features/axios';
 import { useDispatch, useSelector } from "react-redux"
 import ChatBubble from './ChatBubble';
 import { getMessages } from '../features/getMessgaes';
-import { addMessage } from '../redux/messageSlice';
 import { addConversation, setSelectedConversation } from '../redux/conversationSlice';
+import { addMessage} from "../redux/messageSlice";
 
 
 const MODES = [
@@ -52,8 +52,14 @@ const ChatSection = () => {
         conversationId: conversation._id,
         prompt,
       })
-      dispatch(addMessage({ role: 'ai', content: result.data }))
-      console.log(result.data)
+   dispatch(addMessage({
+  role: "ai",
+  content: result.data.answer,
+  images: result.data.images,
+  artifacts: result.data.artifacts,
+  files: result.data.files,
+}))
+   console.log(result.data)
     } catch (error) {
       console.log(error)
     }
@@ -107,7 +113,13 @@ const ChatSection = () => {
         </div>}
         {message.map((mes, i) => (
         <div key={i}>
-         <ChatBubble role={mes.role} content={mes.content} />
+         <ChatBubble 
+            role={mes.role} 
+            content={mes.content} 
+            images={mes.images} 
+            artifacts={mes.artifacts}
+            files={mes.files}
+         />
         </div>
         ))}
 
@@ -115,7 +127,7 @@ const ChatSection = () => {
       </div>
 
       {/* Input Area */}
-      <div className="relative z-20 border-t border-white/[0.06] bg-[#0d0d12]/90 backdrop-blur-xl">
+      <div className="relative border-t border-white/[0.06] bg-[#0d0d12]/90 backdrop-blur-xl">
         <div className="max-w-3xl mx-auto px-6 py-7">
 
           {/* Input Box */}
@@ -156,7 +168,7 @@ const ChatSection = () => {
                   flex-shrink-0 p-3 rounded-xl transition-all duration-300
                   bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white 
                   shadow-lg shadow-violet-500/25 hover:shadow-violet-500/40 
-                  hover:scale-105 active:scale-95
+                  hover:scale-105 active:scale-95 cursor-pointer
                 "
               >
                 <Send className="w-4 h-4" />

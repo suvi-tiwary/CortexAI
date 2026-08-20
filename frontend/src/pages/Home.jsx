@@ -7,6 +7,9 @@ import { useDispatch, useSelector } from "react-redux"
 import { setUserData } from '../redux/userSlice';
 import Sidebar from '../components/Sidebar';
 import ChatSection from '../components/ChatSection';
+import Artifact from '../components/Artifact';
+
+
 
 const Home = () => {
   const dispatch = useDispatch()
@@ -23,7 +26,7 @@ const Home = () => {
   // Not logged in — show centered login card
   if (!userData) {
     return (
-      <div className='bg-[#0F172A] h-screen text-white w-full flex justify-center items-center'>
+      <div className='bg-linear-30 from-gray-800 to-white/5 h-screen text-white w-full flex justify-center items-center'>
         <div className='w-[340px] bg-[#13151c] p-5 flex flex-col my-2 rounded-2xl shadow-2xl'>
           <h2 className='text-white text-[17px] font-bold'>CortexAI</h2>
           <p className='text-gray-500'>Login to use the CortexAI agent</p>
@@ -49,6 +52,7 @@ const Home = () => {
     <div className='bg-[#0F172A] h-screen text-white w-full flex overflow-hidden'>
       <Sidebar />
       <ChatSection />
+     <Artifact/>
     </div>
   )
 }

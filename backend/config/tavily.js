@@ -1,7 +1,10 @@
 import { TavilySearch } from "@langchain/tavily";
 
-const Searchtool = new TavilySearch({
+const searchTool = new TavilySearch({
   maxResults: 5,
   topic: "general",
-  includeImages:true
+  apiKey: process.env.TAVILY_API_KEY,
+  includeImages:false
 });
+
+export default searchTool
