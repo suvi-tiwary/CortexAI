@@ -14,10 +14,12 @@ import agentRouter from "./routers/agentRoute.js"
 const app =express()
 const port = 3000
 
+
 app.use(cors({
-    origin:"cortex-ai-steel.vercel.app",
-    credentials:true
-}))
+    origin: "https://cortex-ai-steel.vercel.app",
+    credentials: true
+}));
+
 app.use(express.json())
 app.use(cookieParser())
 
