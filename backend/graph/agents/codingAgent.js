@@ -630,6 +630,8 @@ export const codingAgent = async (state) => {
                 "",
                 "Return only markdown.",
                 "",
+                "Give answers in point wise and in easy word to make anyone understand it ",
+                "",
                 "Never generate project files.",
                 "",
                 "Use this structure:",
