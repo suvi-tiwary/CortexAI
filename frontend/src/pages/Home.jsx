@@ -2,7 +2,7 @@
 import { auth, googleProvider } from '../config/firebase'
 import { signInWithPopup } from 'firebase/auth'
 import { FcGoogle } from "react-icons/fc";
-import { Sparkles, ShieldCheck, Zap, ArrowRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import api from '../features/axios';
 import { useDispatch, useSelector } from "react-redux"
 import { setUserData } from '../redux/userSlice';
@@ -12,78 +12,62 @@ import Artifact from '../components/Artifact';
 
 const Home = () => {
   const [artifactVisible, setArtifactVisible] = useState(true)
+  const [loginError, setLoginError] = useState("")
   const dispatch = useDispatch()
   const userData = useSelector((state) => state.user.userData)
 
   const googleLogin = async () => {
-    let data = await signInWithPopup(auth, googleProvider)
-    let token = await data.user.getIdToken()
-
-    let result = await api.post("/auth/login", { token }, { withCredentials: true })
-    dispatch(setUserData(result.data))
+    try {
+      setLoginError("")
+      const data = await signInWithPopup(auth, googleProvider)
+      const token = await data.user.getIdToken()
+      const result = await api.post("/auth/login", { token }, { withCredentials: true })
+      dispatch(setUserData(result.data))
+    } catch (error) {
+      setLoginError(error.response?.data?.error || "Sign in could not be completed. Please try again.")
+    }
   }
 
   if (!userData) {
     return (
-      <div className='relative min-h-screen w-full overflow-hidden bg-[#070b14] text-white'>
-        <div
-          className='absolute inset-0 opacity-90'
-          style={{
-            background: 'radial-gradient(circle at top left, rgba(168,85,247,0.24), transparent 28%), radial-gradient(circle at bottom right, rgba(59,130,246,0.16), transparent 24%)',
-          }}
-        />
-        <div className='bg-grid absolute inset-0 opacity-25' />
-
-        <div className='relative z-10 flex min-h-screen items-center justify-center px-4 py-10'>
-          <div className='w-full max-w-5xl overflow-hidden rounded-4xl border border-white/10 bg-white/5 shadow-[0_30px_80px_rgba(15,23,42,0.75)] backdrop-blur-xl'>
-            <div className='grid lg:grid-cols-[1.1fr_0.9fr]'>
-              <div className='p-6 sm:p-8 lg:p-10'>
-                <div className='mb-8 inline-flex items-center gap-2 rounded-full border border-violet-400/30 bg-violet-500/10 px-3 py-1.5 text-xs font-medium tracking-[0.2em] text-violet-200 uppercase'>
-                  <Sparkles size={12} />
-                  CortexAI
-                </div>
-
-                <h1 className='max-w-lg text-4xl font-black tracking-tight text-white sm:text-5xl'>Your AI workspace for building, researching, and shipping faster.</h1>
-                <p className='mt-4 max-w-xl text-base text-slate-300 sm:text-lg'>Turn ideas into polished experiences with search, code generation, artifact previews, and multi-agent workflows—all in one sleek workspace.</p>
-
-                <div className='mt-8 grid gap-3 sm:grid-cols-3'>
-                  {[
-                    { icon: Zap, label: 'Fast workflows' },
-                    { icon: ShieldCheck, label: 'Secure access' },
-                    { icon: Sparkles, label: 'AI-generated artifacts' }
-                  ].map(({ icon: Icon, label }) => (
-                    <div key={label} className='rounded-2xl border border-white/10 bg-slate-900/60 p-3 text-sm text-slate-200'>
-                      <Icon className='mb-2 h-4 w-4 text-violet-300' />
-                      {label}
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className='flex items-center justify-center bg-slate-950/70 p-6 sm:p-8 lg:p-10'>
-                <div className='w-full max-w-md rounded-3xl border border-white/10 bg-[#111827]/80 p-6 shadow-2xl shadow-violet-950/30'>
-                  <div className='mb-6'>
-                    <p className='text-xs uppercase tracking-[0.25em] text-slate-400'>Welcome back</p>
-                    <h2 className='mt-3 text-2xl font-bold text-white'>Sign in to continue</h2>
-                  </div>
-
-                  <button
-                    onClick={googleLogin}
-                    className='group flex w-full items-center justify-center gap-3 rounded-2xl bg-white px-4 py-3.5 text-base font-semibold text-slate-900 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_16px_30px_rgba(255,255,255,0.18)] active:scale-[0.99]'
-                  >
-                    <FcGoogle size={22} />
-                    <span>Continue with Google</span>
-                    <ArrowRight size={16} className='opacity-70 transition-transform group-hover:translate-x-1' />
-                  </button>
-
-                  <div className='mt-6 rounded-2xl border border-violet-500/20 bg-violet-500/5 p-4 text-sm text-slate-300'>
-                    Smart chat, instant code previews, and output artifacts designed for product teams and creators.
-                  </div>
-                </div>
-              </div>
+      <div className='grid min-h-screen w-full bg-[#f1f3ee] text-[#202c27] lg:grid-cols-[1.1fr_0.9fr]'>
+        <section className='relative flex min-h-[52vh] flex-col justify-between overflow-hidden bg-[#1d332b] px-7 py-7 text-white sm:px-12 sm:py-10 lg:min-h-screen lg:px-16 lg:py-12'>
+          <div className='bg-grid pointer-events-none absolute inset-0 opacity-20' />
+          <div className='relative flex items-center gap-3'>
+            <div className='flex h-10 w-10 items-center justify-center rounded-xl bg-[#d4e873] text-lg font-bold text-[#1d332b]'>c.</div>
+            <div>
+              <p className='text-sm font-semibold tracking-wide'>CortexAI</p>
+              <p className='text-[10px] uppercase tracking-[0.18em] text-[#b2c1b8]'>Creative studio</p>
             </div>
           </div>
-        </div>
+
+          <div className='relative my-12 lg:my-0'>
+            <p className='mb-5 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#d4e873]'>A little room to think</p>
+            <h1 className='display-type max-w-2xl text-5xl font-medium leading-[1.08] sm:text-6xl lg:text-7xl'>Good ideas <span className='text-[#d4e873]'>start somewhere.</span></h1>
+            <div className='mt-8 h-px w-24 bg-[#d4e873]/60' />
+          </div>
+
+          <p className='relative text-xs text-[#b2c1b8]'>Make yourself at home.</p>
+        </section>
+
+        <section className='flex min-h-[48vh] items-center justify-center px-6 py-12 sm:px-12 lg:min-h-screen'>
+          <div className='w-full max-w-sm'>
+            <p className='text-[10px] font-semibold uppercase tracking-[0.2em] text-[#75817a]'>Your workspace is waiting</p>
+            <h2 className='display-type mt-3 text-4xl font-semibold text-[#202c27]'>Welcome back.</h2>
+            <p className='mt-3 text-sm leading-6 text-[#75817a]'>Sign in to pick up where you left off.</p>
+
+            <button
+              onClick={googleLogin}
+              className='group mt-8 flex w-full items-center justify-center gap-3 rounded-xl border border-[#d5ddd5] bg-white px-4 py-3.5 text-sm font-semibold text-[#202c27] transition-colors hover:border-[#aab8ad] hover:bg-[#fbfcf9] active:scale-[0.99]'
+            >
+              <FcGoogle size={20} />
+              <span>Continue with Google</span>
+              <ArrowRight size={16} className='ml-auto text-[#d9634e] transition-transform group-hover:translate-x-1' />
+            </button>
+            {loginError && <p role='alert' className='mt-3 text-sm text-[#bd4f3c]'>{loginError}</p>}
+            <p className='mt-5 text-xs text-[#87928a]'>Your account stays yours. Sign in securely with Google.</p>
+          </div>
+        </section>
       </div>
     )
   }

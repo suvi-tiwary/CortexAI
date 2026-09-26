@@ -32,7 +32,7 @@ const ChatBubble = ({ role, content, images, files }) => {
       className={`flex my-3 px-5 ${isUser ? "justify-end" : "justify-start" }`}>
 
       <div
-        className={`max-w-[75%] rounded-2xl px-4 py-3 ${isUser?"bg-violet-600 text-white rounded-tr-sm": " text-zinc-100" }`}>
+        className={`max-w-[75%] rounded-2xl px-4 py-3 ${isUser ? "rounded-tr-sm bg-[#1d332b] text-white" : "text-[#28352e]"}`}>
 
         {isUser?<p className="whitespace-pre-wrap">
             {content}
@@ -41,16 +41,16 @@ const ChatBubble = ({ role, content, images, files }) => {
           <ReactMarkdown remarkPlugins={[remarkGfm]}
           components={{
             h1:({children})=>(
-              <h1 className="font-bold text-2xl mt-5 mb-3 text-red-500">{children}</h1>
+              <h1 className="display-type mt-5 mb-3 text-2xl font-semibold text-[#1d332b]">{children}</h1>
              ),
              h2:({children})=>(
-              <h2 className="font-semibold text-xl mt-4 mb-2">{children}</h2>
+              <h2 className="mt-4 mb-2 text-xl font-semibold text-[#1d332b]">{children}</h2>
              ),
               h3:({children})=>(
-              <h3 className="text-xl mt-4 mb-2">{children}</h3>
+              <h3 className="mt-4 mb-2 text-lg font-semibold text-[#34453b]">{children}</h3>
              ),
              p:({children})=>(
-              <p className="mb-3 whitespace-pre-wrap break-words">{children}</p>
+              <p className="mb-3 whitespace-pre-wrap wrap-break-word leading-7">{children}</p>
              ),
              ul:({children})=>(
               <ul className="list-disc pl-5 space-y-1 my-2 ">{children}</ul>
@@ -60,27 +60,27 @@ const ChatBubble = ({ role, content, images, files }) => {
              ),
              table:({children})=>(
               <div className="overflow-x-auto my-4">
-              <table className="min-w-full border border-white/10">{children}</table>
+              <table className="min-w-full border border-[#dfe5de]">{children}</table>
               </div>
              ),
              th:({children})=>(
-              <th className="border border-white/10 bg-white/5 px-3 py-2 text-left">{children}</th>
+              <th className="border border-[#dfe5de] bg-[#f1f3ee] px-3 py-2 text-left">{children}</th>
              ),
               td:({children})=>(
-              <td className="border border-white/10 px-3 py-2">{children}</td>
+              <td className="border border-[#dfe5de] px-3 py-2">{children}</td>
              ),
 
              code:({className,children})=>{
               const value = String(children).trim();
               if(!className){
-                return <code className="px-1.5 py-0.5 rounded-xl bg-white/10 text-violet-500">{value}</code>
+                return <code className="rounded bg-[#e8eee5] px-1.5 py-0.5 text-[#315c48]">{value}</code>
               }
 
               const language = className?.replace("language-","")
               return (
                 <div className="my-4 overflow-hidden rounded-xl border border-white/10 bg-[#111318]">
-                  <div className=" flex justify-between bg-[#1b1d24] border-b border-white/10 ml-2 mr-2 p-1">
-                  <span className=" uppercase text-sm text-slate-500">{language}</span>
+                  <div className="ml-2 mr-2 flex justify-between border-b border-white/10 bg-[#1b1d24] p-1">
+                  <span className="uppercase text-sm text-slate-400">{language}</span>
 
                   <button className="flex items-center gap-1 text-xs cursor-pointer" onClick={()=>copyCode(value)}>{copiedCode==value?<><Check/>Copied</>:<><Copy size={16}/>Copy</>}</button>
                 </div>
@@ -135,7 +135,7 @@ const ChatBubble = ({ role, content, images, files }) => {
             src={file.url}
             alt={file.name}
             onClick={() => setLightBox(file.url)}
-            className="w-[430px] h-[290px] object-cover border border-white/10 cursor-zoom-in rounded-xl hover:opacity-90 transition"
+            className="h-[290px] w-[430px] rounded-xl border border-[#dfe5de] object-cover transition hover:opacity-90"
           />
         );
       }
@@ -149,10 +149,10 @@ const ChatBubble = ({ role, content, images, files }) => {
             target="_blank"
             rel="noopener noreferrer"
             download={file.name}
-            className="px-4 py-3 rounded-xl bg-white/10 hover:bg-white/20"
+            className="rounded-lg border border-[#dfe5de] bg-white px-4 py-3 text-sm text-[#34453b] transition-colors hover:bg-[#f1f3ee]"
           >
             {file.name}
-          </a> : <span key={index} className="px-4 py-3 rounded-xl bg-white/10">{file.name}</span>
+          </a> : <span key={index} className="rounded-lg border border-[#dfe5de] bg-white px-4 py-3 text-sm">{file.name}</span>
         );
       }
 
@@ -165,10 +165,10 @@ const ChatBubble = ({ role, content, images, files }) => {
             target="_blank"
             rel="noopener noreferrer"
             download={file.name}
-            className="px-4 py-3 rounded-xl bg-white/10 hover:bg-white/20"
+            className="rounded-lg border border-[#dfe5de] bg-white px-4 py-3 text-sm text-[#34453b] transition-colors hover:bg-[#f1f3ee]"
           >
             {file.name}
-          </a> : <span key={index} className="px-4 py-3 rounded-xl bg-white/10">{file.name}</span>
+          </a> : <span key={index} className="rounded-lg border border-[#dfe5de] bg-white px-4 py-3 text-sm">{file.name}</span>
         );
       }
 
@@ -181,9 +181,9 @@ const ChatBubble = ({ role, content, images, files }) => {
 
       </div>
 
-      {lightbox && <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex justify-center items-center p-6">
-        <button className="absolute top-5 right-5 text-white/80 hover:text-white w-[38px] h-[47px] p-3 bg-red-700 cursor-pointer" onClick={()=>setLightBox(null)}>
-          x
+      {lightbox && <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-6 backdrop-blur-sm">
+        <button aria-label="Close preview" className="absolute right-5 top-5 flex h-10 w-10 items-center justify-center rounded-lg bg-[#d9634e] text-white hover:bg-[#c85340]" onClick={()=>setLightBox(null)}>
+          ×
         </button>
         <img src={lightbox} className="max-w-[90vw] max-h-[80vh] rounded-2xl border border-white/10 shadow-2xl object-contain"/>
         </div>}

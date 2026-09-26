@@ -1,25 +1,31 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&display=swap');
 @import "tailwindcss";
 
 :root {
-  color-scheme: dark;
-  font-family: Inter, "Segoe UI", sans-serif;
-  background: #070b14;
+  color-scheme: light;
+  --canvas: #f1f3ee;
+  --surface: #fbfcf9;
+  --ink: #202c27;
+  --muted: #75817a;
+  --line: #dfe5de;
+  --pine: #1d332b;
+  --coral: #d9634e;
+  --citrus: #d4e873;
+  font-family: "DM Sans", sans-serif;
+  background: var(--canvas);
 }
 
 html, body, #root {
   margin: 0;
   min-height: 100%;
   min-width: 0;
-  background: #070b14;
+  background: var(--canvas);
 }
 
 body {
   min-height: 100vh;
-  color: #f8fafc;
-  background:
-    radial-gradient(circle at top left, rgba(168, 85, 247, 0.18), transparent 30%),
-    radial-gradient(circle at bottom right, rgba(14, 165, 233, 0.15), transparent 26%),
-    #070b14;
+  color: var(--ink);
+  background: var(--canvas);
 }
 
 button,
@@ -33,10 +39,18 @@ textarea {
 
 .bg-grid {
   background-image:
-    linear-gradient(rgba(148, 163, 184, 0.09) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(148, 163, 184, 0.09) 1px, transparent 1px);
-  background-size: 36px 36px;
-  mask-image: radial-gradient(circle at center, black 35%, transparent 100%);
+    linear-gradient(rgba(29, 51, 43, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(29, 51, 43, 0.035) 1px, transparent 1px);
+  background-size: 44px 44px;
+}
+
+.display-type {
+  font-family: "Fraunces", Georgia, serif;
+}
+
+::selection {
+  color: var(--pine);
+  background: var(--citrus);
 }
 
 .custom-scrollbar {
