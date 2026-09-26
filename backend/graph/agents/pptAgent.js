@@ -7,8 +7,16 @@ const escapeHtml = (value = "") => String(value).replace(/[&<>"']/g, (character)
 	"&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;"
 }[character]))
 
+const defaultTheme = {
+	accent: "D9634E",
+	background: "FBFCF9",
+	text: "202C27",
+	headingFont: "Fraunces",
+	bodyFont: "Aptos"
+}
+
 const getTemplateTheme = async (templatePath) => {
-	if (!templatePath) return {}
+	if (!templatePath) return defaultTheme
 	const archive = new AdmZip(templatePath)
 	const theme = archive.getEntry("ppt/theme/theme1.xml")?.getData().toString("utf8") || ""
 	const color = (name, fallback) => {
@@ -18,11 +26,11 @@ const getTemplateTheme = async (templatePath) => {
 	const headingFont = theme.match(/<a:majorFont>[\s\S]*?<a:latin typeface="([^"]+)"/)?.[1]
 	const bodyFont = theme.match(/<a:minorFont>[\s\S]*?<a:latin typeface="([^"]+)"/)?.[1]
 	return {
-		accent: color("accent1", "147D72"),
-		background: color("lt1", "F5F7F5"),
-		text: color("dk1", "1B2926"),
-		headingFont: headingFont || "Aptos Display",
-		bodyFont: bodyFont || "Aptos"
+		accent: color("accent1", defaultTheme.accent),
+		background: color("lt1", defaultTheme.background),
+		text: color("dk1", defaultTheme.text),
+		headingFont: headingFont || defaultTheme.headingFont,
+		bodyFont: bodyFont || defaultTheme.bodyFont
 	}
 }
 
