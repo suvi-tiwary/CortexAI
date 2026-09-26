@@ -9,6 +9,7 @@ import { protect } from "./middleware/auth.js"
 import getCurrentUserRoute from "./routers/getCurrentUserRoute.js"
 import chatRouter from "./routers/chatRoute.js"
 import agentRouter from "./routers/agentRoute.js"
+import { fileURLToPath } from "node:url"
 
 
 const app =express()
@@ -22,6 +23,8 @@ app.use(cors({
 
 app.use(express.json())
 app.use(cookieParser())
+app.use("/uploads", express.static(fileURLToPath(new URL("./public/uploads/", import.meta.url))))
+app.use("/generated", express.static(fileURLToPath(new URL("./public/generated/", import.meta.url))))
 
 app.use("/auth",authRouter)
 app.use("/",protect,getCurrentUserRoute)

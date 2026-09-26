@@ -1,12 +1,12 @@
-import { Children } from "react";
 import { useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import {Copy,Check} from "lucide-react"
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
+import api from "../features/axios";
 
-const ChatBubble = ({ role, content, images, artifacts,files }) => {
+const ChatBubble = ({ role, content, images, files }) => {
 
   const isUser = role === "user";
   const [lightbox,setLightBox]=useState(null)
@@ -18,6 +18,14 @@ const ChatBubble = ({ role, content, images, artifacts,files }) => {
      setTimeout(()=>{
       setCopiedCode("")
      },2000)
+  }
+  const fileUrl = (url) => {
+    if (!url) return ""
+    try {
+      return new URL(url, api.defaults.baseURL || window.location.origin).toString()
+    } catch {
+      return url
+    }
   }
   return (
     <div 
@@ -133,30 +141,34 @@ const ChatBubble = ({ role, content, images, artifacts,files }) => {
       }
 
       if (file.type === "pdf") {
+        const href = fileUrl(file.url)
         return (
-          <a
+          href ? <a
             key={index}
-            href={file.url}
+            href={href}
             target="_blank"
             rel="noopener noreferrer"
+            download={file.name}
             className="px-4 py-3 rounded-xl bg-white/10 hover:bg-white/20"
           >
-            📄 {file.name}
-          </a>
+            {file.name}
+          </a> : <span key={index} className="px-4 py-3 rounded-xl bg-white/10">{file.name}</span>
         );
       }
 
       if (file.type === "ppt") {
+        const href = fileUrl(file.url)
         return (
-          <a
+          href ? <a
             key={index}
-            href={file.url}
+            href={href}
             target="_blank"
             rel="noopener noreferrer"
+            download={file.name}
             className="px-4 py-3 rounded-xl bg-white/10 hover:bg-white/20"
           >
-            📊 {file.name}
-          </a>
+            {file.name}
+          </a> : <span key={index} className="px-4 py-3 rounded-xl bg-white/10">{file.name}</span>
         );
       }
 

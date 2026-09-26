@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   Send,
   Bot,
@@ -13,13 +13,16 @@ import {
   Sparkles,
   Wand2,
   ArrowUpRight,
+  Eye,
+  EyeOff,
+  X,
 } from 'lucide-react';
 import api from '../features/axios';
 import { useDispatch, useSelector } from "react-redux"
 import ChatBubble from './ChatBubble';
 import { getMessages } from '../features/getMessgaes';
 import { addConversation, setSelectedConversation } from '../redux/conversationSlice';
-import { addMessage } from "../redux/messageSlice";
+import { addMessage, updateMessageFiles } from "../redux/messageSlice";
 
 const MODES = [
   { id: 'auto', label: 'Auto', icon: Zap },
@@ -38,11 +41,17 @@ const QUICK_PROMPTS = [
   'Generate a product launch announcement',
 ];
 
-const ChatSection = () => {
+const ChatSection = ({ artifactVisible, onToggleArtifact }) => {
   const { selectedConversation } = useSelector((state) => state.conversation)
   const { message } = useSelector((state) => state.message)
   const [value, setValue] = useState("")
   const [activeMode, setActiveMode] = useState('auto')
+  const [selectedFiles, setSelectedFiles] = useState([])
+  const [recording, setRecording] = useState(false)
+  const [sending, setSending] = useState(false)
+  const [error, setError] = useState("")
+  const fileInputRef = useRef(null)
+  const recognitionRef = useRef(null)
   const dispatch = useDispatch()
   const skipInitialFetch = useRef(false)
 
@@ -55,22 +64,35 @@ const ChatSection = () => {
   }
 
   const sendMessage = async () => {
-    if (!value.trim()) return
-
-    let conversation = selectedConversation
-    if (!conversation) {
-      conversation = await createConversation()
-    }
-
-    const prompt = value
-    dispatch(addMessage({ role: 'user', content: prompt }))
-    setValue("")
-
+    if ((!value.trim() && selectedFiles.length === 0) || sending) return
+    const prompt = value.trim() || "Please analyze the uploaded document."
+    const filesToUpload = selectedFiles
+    const clientId = crypto.randomUUID()
+    setSending(true)
+    setError("")
     try {
-      const result = await api.post("/agent", {
-        conversationId: conversation._id,
-        prompt,
-      })
+      let conversation = selectedConversation
+      if (!conversation) conversation = await createConversation()
+
+      dispatch(addMessage({
+        clientId,
+        role: 'user',
+        content: prompt,
+        files: filesToUpload.map((file) => ({
+          name: file.name,
+          type: file.name.toLowerCase().endsWith('.pdf') ? 'pdf' : 'ppt',
+        })),
+      }))
+      setValue("")
+      setSelectedFiles([])
+
+      const formData = new FormData()
+      formData.append("conversationId", conversation._id)
+      formData.append("prompt", prompt)
+      formData.append("mode", activeMode)
+      filesToUpload.forEach((file) => formData.append("files", file))
+      const result = await api.post("/agent", formData)
+      dispatch(updateMessageFiles({ clientId, files: result.data.userFiles || [] }))
       dispatch(addMessage({
         role: "ai",
         content: result.data.answer,
@@ -79,8 +101,36 @@ const ChatSection = () => {
         files: result.data.files,
       }))
     } catch (error) {
-      console.log(error)
+      setError(error.response?.data?.error || "Something went wrong. Please try again.")
+    } finally {
+      setSending(false)
     }
+  }
+
+  const toggleVoiceInput = () => {
+    if (recording) {
+      recognitionRef.current?.stop()
+      setRecording(false)
+      return
+    }
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
+    if (!SpeechRecognition) {
+      setError("Voice input is not supported in this browser.")
+      return
+    }
+    const recognition = new SpeechRecognition()
+    recognition.lang = navigator.language || "en-US"
+    recognition.interimResults = false
+    recognition.onresult = (event) => {
+      const transcript = Array.from(event.results).map((result) => result[0].transcript).join(" ")
+      setValue((current) => `${current}${current ? " " : ""}${transcript}`)
+    }
+    recognition.onerror = () => setError("Voice input stopped. Check microphone permission and try again.")
+    recognition.onend = () => setRecording(false)
+    recognitionRef.current = recognition
+    setError("")
+    setRecording(true)
+    recognition.start()
   }
 
   useEffect(() => {
@@ -127,6 +177,16 @@ const ChatSection = () => {
               <span className='h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_12px_rgba(74,222,128,0.9)]' />
               online
             </div>
+            {message.some((item) => item.role === 'ai' && item.artifacts?.length > 0) && (
+              <button
+                onClick={onToggleArtifact}
+                title={artifactVisible ? 'Hide artifact' : 'Show artifact'}
+                aria-label={artifactVisible ? 'Hide artifact' : 'Show artifact'}
+                className='flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-white/10 text-slate-300 transition hover:bg-white/10 hover:text-white'
+              >
+                {artifactVisible ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
+            )}
           </div>
 
           <div className='mt-4 flex gap-2 overflow-x-auto pb-1 custom-scrollbar'>
@@ -192,9 +252,26 @@ const ChatSection = () => {
             <div className='relative group'>
               <div className='absolute -inset-0.5 rounded-3xl bg-gradient-to-r from-violet-500/25 via-fuchsia-500/20 to-cyan-500/25 opacity-0 blur transition duration-500 group-focus-within:opacity-100' />
               <div className='relative flex items-end gap-2 rounded-3xl border border-white/10 bg-[#121a2e]/90 p-3 shadow-[0_16px_40px_rgba(15,23,42,0.55)] backdrop-blur-xl sm:p-4'>
-                <button className='mb-1 rounded-xl p-2 text-slate-400 transition hover:bg-white/5 hover:text-white'>
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  title='Attach a PDF or PowerPoint template'
+                  aria-label='Attach a PDF or PowerPoint template'
+                  className='mb-1 rounded-xl p-2 text-slate-400 transition hover:bg-white/5 hover:text-white'
+                >
                   <Paperclip className='h-4 w-4 sm:h-5 sm:w-5' />
                 </button>
+                <input
+                  ref={fileInputRef}
+                  type='file'
+                  accept='.pdf,.pptx,application/pdf,application/vnd.openxmlformats-officedocument.presentationml.presentation'
+                  multiple
+                  className='hidden'
+                  onChange={(event) => {
+                    const files = Array.from(event.target.files || [])
+                    setSelectedFiles((current) => [...current, ...files].slice(0, 3))
+                    event.target.value = ''
+                  }}
+                />
 
                 <textarea
                   onChange={(e) => setValue(e.target.value)}
@@ -211,19 +288,37 @@ const ChatSection = () => {
                   }}
                 />
 
-                <button className='mb-1 rounded-xl p-2 text-slate-400 transition hover:bg-violet-500/10 hover:text-violet-200'>
+                <button
+                  onClick={toggleVoiceInput}
+                  title={recording ? 'Stop voice input' : 'Start voice input'}
+                  aria-label={recording ? 'Stop voice input' : 'Start voice input'}
+                  className={`mb-1 rounded-xl p-2 transition ${recording ? 'bg-rose-500/15 text-rose-300' : 'text-slate-400 hover:bg-violet-500/10 hover:text-violet-200'}`}
+                >
                   <Mic className='h-4 w-4 sm:h-5 sm:w-5' />
                 </button>
 
                 <button
                   onClick={sendMessage}
-                  className='flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-r from-violet-600 via-indigo-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/30 transition hover:-translate-y-0.5 hover:shadow-violet-500/40 active:scale-95'
+                  disabled={sending || (!value.trim() && selectedFiles.length === 0)}
+                  className='flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-r from-violet-600 via-indigo-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/30 transition hover:-translate-y-0.5 hover:shadow-violet-500/40 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50'
                   aria-label='Send message'
                 >
                   <Send className='h-4 w-4' />
                 </button>
               </div>
             </div>
+
+            {selectedFiles.length > 0 && (
+              <div className='mt-2 flex flex-wrap gap-2'>
+                {selectedFiles.map((file, index) => (
+                  <span key={`${file.name}-${index}`} className='flex max-w-full items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-2.5 py-1.5 text-xs text-slate-200'>
+                    <span className='max-w-56 truncate'>{file.name}</span>
+                    <button onClick={() => setSelectedFiles((current) => current.filter((_, fileIndex) => fileIndex !== index))} aria-label={`Remove ${file.name}`} className='text-slate-400 hover:text-white'><X size={13} /></button>
+                  </span>
+                ))}
+              </div>
+            )}
+            {error && <p role='alert' className='mt-2 text-xs text-rose-300'>{error}</p>}
 
             <div className='mt-3 flex items-center justify-between gap-2 text-[10px] text-slate-500'>
               <div className='flex items-center gap-2'>

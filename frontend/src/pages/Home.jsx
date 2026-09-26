@@ -1,4 +1,4 @@
-﻿import React from 'react'
+﻿import { useState } from 'react'
 import { auth, googleProvider } from '../config/firebase'
 import { signInWithPopup } from 'firebase/auth'
 import { FcGoogle } from "react-icons/fc";
@@ -11,6 +11,7 @@ import ChatSection from '../components/ChatSection';
 import Artifact from '../components/Artifact';
 
 const Home = () => {
+  const [artifactVisible, setArtifactVisible] = useState(true)
   const dispatch = useDispatch()
   const userData = useSelector((state) => state.user.userData)
 
@@ -91,8 +92,8 @@ const Home = () => {
     <div className='h-screen w-full overflow-hidden bg-[#070b14] text-white'>
       <div className='flex h-full w-full'>
         <Sidebar />
-        <ChatSection />
-        <Artifact />
+        <ChatSection artifactVisible={artifactVisible} onToggleArtifact={() => setArtifactVisible((visible) => !visible)} />
+        <Artifact visible={artifactVisible} onHide={() => setArtifactVisible(false)} />
       </div>
     </div>
   )

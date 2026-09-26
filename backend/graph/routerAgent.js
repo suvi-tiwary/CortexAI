@@ -2,6 +2,15 @@ import { getModel } from "./LLMS.js"
 
 export const routerAgent = async(state)=>{
      try {
+    if (state.documentText) {
+      return { ...state, agent: "pdf" }
+    }
+    if (state.templatePath) {
+      return { ...state, agent: "ppt" }
+    }
+    if (["chat", "search", "coding", "pdf", "ppt", "vision"].includes(state.mode) && state.mode !== "auto") {
+      return { ...state, agent: state.mode }
+    }
           const llm = await getModel("router")
           const systemPrompt =`You are a Router Agent.
 

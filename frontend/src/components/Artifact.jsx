@@ -1,11 +1,12 @@
-﻿import React, { useState } from 'react'
-import { Code2, Eye, PanelRightClose } from "lucide-react"
+﻿import { useState } from 'react'
+import { Code2, Download, Eye, Maximize2, Minimize2, PanelRightClose } from "lucide-react"
 import { useSelector } from 'react-redux'
 import { easeInOut, motion } from 'framer-motion'
 import Editor from "@monaco-editor/react"
+import JSZip from 'jszip'
 
-const Artifact = () => {
-  const [collapse, setCollapse] = useState(false)
+const Artifact = ({ visible, onHide }) => {
+  const [expanded, setExpanded] = useState(() => window.innerWidth < 1280)
   const [tab, setTab] = useState("preview")
   const [activeFile, setActiveFile] = useState(0)
 
@@ -15,7 +16,7 @@ const Artifact = () => {
     .find((message) => message.role === "ai" && message.artifacts?.length)
 
   const artifact = artifactMessage?.artifacts?.[0]
-  if (!artifact) return null
+  if (!artifact || !visible) return null
 
   const file = artifact?.files?.[activeFile]
 
@@ -54,19 +55,32 @@ const Artifact = () => {
     return "plaintext"
   }
 
+  const downloadArtifact = async () => {
+    const zip = new JSZip()
+    artifact.files?.forEach((item) => zip.file(item.name, item.content || ""))
+    const blob = await zip.generateAsync({ type: "blob" })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement("a")
+    link.href = url
+    link.download = `${(artifact.title || "artifact").replace(/[^a-z0-9]+/gi, "-").replace(/^-|-$/g, "") || "artifact"}.zip`
+    link.click()
+    URL.revokeObjectURL(url)
+  }
+
   return (
     <motion.aside
-      initial={{ width: "350px" }}
-      animate={{ width: collapse ? 52 : 350 }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
       transition={{ duration: 0.23, ease: easeInOut }}
-      className='hidden h-full shrink-0 overflow-hidden border-l border-white/6 bg-[#0d0f14] xl:flex'
+      className={`${expanded ? 'fixed inset-3 z-50 h-[calc(100%-1.5rem)] w-[calc(100%-1.5rem)] shadow-2xl' : 'hidden h-full w-[min(460px,38vw)] xl:flex'} shrink-0 overflow-hidden border border-white/10 bg-[#0d0f14]`}
     >
-      {!collapse ? (
         <div className='flex h-full w-full flex-col'>
           <div className='flex h-14 shrink-0 items-center gap-3 border-b border-white/6 px-4'>
             <button
-              className='flex h-7 w-7 items-center justify-center rounded-lg border border-white/10 bg-white/3 text-slate-400 transition hover:text-slate-200'
-              onClick={() => setCollapse((prev) => !prev)}
+              title='Hide artifact'
+              aria-label='Hide artifact'
+              className='flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 bg-white/3 text-slate-400 transition hover:text-slate-200'
+              onClick={onHide}
             >
               <PanelRightClose size={18} />
             </button>
@@ -74,6 +88,24 @@ const Artifact = () => {
             <div className='min-w-0 flex-1'>
               <div className='truncate text-[14px] font-medium text-slate-200'>{artifact?.title || 'Generated artifact'}</div>
             </div>
+
+            {window.innerWidth >= 1280 && <button
+              title={expanded ? 'Exit full view' : 'View full screen'}
+              aria-label={expanded ? 'Exit full view' : 'View full screen'}
+              className='flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 text-slate-400 transition hover:bg-white/5 hover:text-slate-200'
+              onClick={() => setExpanded((value) => !value)}
+            >
+              {expanded ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
+            </button>}
+
+            <button
+              title='Download artifact files'
+              aria-label='Download artifact files'
+              className='flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 text-slate-400 transition hover:bg-white/5 hover:text-slate-200'
+              onClick={downloadArtifact}
+            >
+              <Download size={16} />
+            </button>
 
             {canPreview && (
               <div className='flex items-center gap-1 rounded-lg border border-white/10 bg-white/4 p-1'>
@@ -126,20 +158,6 @@ const Artifact = () => {
             )}
           </div>
         </div>
-      ) : (
-        <div className='flex h-full w-full flex-col bg-[#0d0f14]'>
-          <button
-            className='m-2.5 flex h-7 w-7 items-center justify-center rounded-lg border border-white/10 bg-white/3 text-slate-400 transition hover:text-slate-200'
-            onClick={() => setCollapse((prev) => !prev)}
-          >
-            <PanelRightClose size={18} />
-          </button>
-
-          <div className='flex h-full items-center justify-center text-[11px] font-medium uppercase tracking-[0.35em] text-slate-200 whitespace-nowrap' style={{ writingMode: 'vertical-lr' }}>
-            {artifact?.title || 'Artifact'}
-          </div>
-        </div>
-      )}
     </motion.aside>
   )
 }
