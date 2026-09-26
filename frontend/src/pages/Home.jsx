@@ -24,7 +24,9 @@ const Home = () => {
       const result = await api.post("/auth/login", { token }, { withCredentials: true })
       dispatch(setUserData(result.data))
     } catch (error) {
-      setLoginError(error.response?.data?.error || "Sign in could not be completed. Please try again.")
+      setLoginError(error.response?.data?.error || (error.request
+        ? "The CortexAI server could not be reached from this address. Check the API URL and backend CORS settings."
+        : "Sign in could not be completed. Please try again."))
     }
   }
 

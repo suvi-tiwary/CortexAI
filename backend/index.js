@@ -14,10 +14,17 @@ import { fileURLToPath } from "node:url"
 
 const app =express()
 const port = process.env.PORT || 3000
+const frontendOrigin = process.env.FRONTEND_URL || "http://localhost:5173"
 
 
 app.use(cors({
-    origin:process.env.FRONTEND_URL || "http://localhost:5173",
+    origin: (origin, callback) => {
+        const isDevelopmentOrigin = origin && /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)
+        if (!origin || origin === frontendOrigin || isDevelopmentOrigin) {
+            return callback(null, true)
+        }
+        return callback(new Error("Origin is not allowed by CORS."))
+    },
     credentials:true
 }));
 

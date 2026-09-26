@@ -89,14 +89,14 @@ const Artifact = ({ visible, onHide }) => {
               <div className='truncate text-[14px] font-medium text-[#202c27]'>{artifact?.title || 'Generated artifact'}</div>
             </div>
 
-            {window.innerWidth >= 1280 && <button
+            <button
               title={expanded ? 'Exit full view' : 'View full screen'}
               aria-label={expanded ? 'Exit full view' : 'View full screen'}
               className='flex h-8 w-8 items-center justify-center rounded-lg border border-[#dfe5de] text-[#75817a] transition hover:bg-white hover:text-[#202c27]'
               onClick={() => setExpanded((value) => !value)}
             >
               {expanded ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
-            </button>}
+            </button>
 
             <button
               title='Download artifact files'

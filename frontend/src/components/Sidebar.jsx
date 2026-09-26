@@ -54,7 +54,7 @@ const Sidebar = () => {
       )}
 
       <aside
-        className={`fixed inset-y-0 left-0 z-40 flex w-[82vw] max-w-[300px] flex-col border-r border-white/8 bg-[#1d332b] text-white shadow-2xl shadow-black/20 transition-transform duration-300 lg:static lg:z-auto lg:w-[264px] ${mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}
+        className={`fixed inset-y-0 left-0 z-40 flex w-[82vw] max-w-75 flex-col border-r border-white/8 bg-[#1d332b] text-white shadow-2xl shadow-black/20 transition-transform duration-300 lg:static lg:z-auto lg:w-66 ${mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}
       >
         <div className='flex items-center justify-between gap-3 px-4 py-5 lg:px-5'>
           <div className='flex items-center gap-3'>
@@ -122,7 +122,7 @@ const Sidebar = () => {
 
         <div className='border-t border-white/10 p-4'>
           <div className='flex items-center gap-2'>
-            <button className='flex flex-1 items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.04] p-2.5 text-left transition hover:bg-white/[0.08]'>
+            <button className='flex flex-1 items-center gap-3 rounded-xl border border-white/10 bg-white/4 p-2.5 text-left transition hover:bg-white/8'>
               <div className='flex h-9 w-9 items-center justify-center rounded-full bg-[#d9634e]'>
                 <CgProfile size={18} className='text-white' />
               </div>

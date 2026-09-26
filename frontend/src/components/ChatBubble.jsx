@@ -135,7 +135,7 @@ const ChatBubble = ({ role, content, images, files }) => {
             src={file.url}
             alt={file.name}
             onClick={() => setLightBox(file.url)}
-            className="h-[290px] w-[430px] rounded-xl border border-[#dfe5de] object-cover transition hover:opacity-90"
+            className="h-72.5 w-107.5 rounded-xl border border-[#dfe5de] object-cover transition hover:opacity-90"
           />
         );
       }
