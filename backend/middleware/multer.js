@@ -20,7 +20,8 @@ const upload = multer({
     limits: { fileSize: 15 * 1024 * 1024, files: 3 },
     fileFilter: (req, file, callback) => {
         const allowedTypes = ["application/pdf", "application/vnd.openxmlformats-officedocument.presentationml.presentation"]
-        callback(allowedTypes.includes(file.mimetype) ? null : new Error("Upload a PDF or PowerPoint (.pptx) file."), allowedTypes.includes(file.mimetype))
+        const supported = allowedTypes.includes(file.mimetype) || /\.(pdf|pptx)$/i.test(file.originalname)
+        callback(supported ? null : new Error("Upload a PDF or PowerPoint (.pptx) file."), supported)
     }
 })
 

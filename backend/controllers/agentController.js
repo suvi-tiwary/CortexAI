@@ -18,14 +18,14 @@ export const agent = async (req, res) => {
         const uploadedFiles = uploads.map((file) => ({
             name: file.originalname,
             url: `/uploads/${encodeURIComponent(file.filename)}`,
-            type: file.mimetype === "application/pdf" ? "pdf" : "ppt"
+            type: file.originalname.toLowerCase().endsWith(".pdf") ? "pdf" : "ppt"
         }));
-        const pdfFiles = uploads.filter((file) => file.mimetype === "application/pdf");
+        const pdfFiles = uploads.filter((file) => file.originalname.toLowerCase().endsWith(".pdf"));
         const documentText = (await Promise.all(pdfFiles.map(async (file) => {
             const parsed = await pdfParse(await readFile(file.path));
             return parsed.text;
         }))).filter(Boolean).join("\n\n").slice(0, 50000);
-        const template = uploads.find((file) => file.mimetype === "application/vnd.openxmlformats-officedocument.presentationml.presentation");
+        const template = uploads.find((file) => file.originalname.toLowerCase().endsWith(".pptx"));
 
         const message = await Message.create({
             role: "user",
